@@ -1,0 +1,85 @@
+-- This SQL script is generated from a DBML schema.
+-- It creates the tables and relationships for a basic e-commerce system in PostgreSQL.
+
+-- =============================================
+-- TABLE CREATION
+-- =============================================
+
+CREATE TABLE "users" (
+  "id" SERIAL PRIMARY KEY,
+  "full_name" VARCHAR(255),
+  "email" VARCHAR(255) UNIQUE NOT NULL,
+  "created_at" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+  "password" VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE "merchants" (
+  "id" SERIAL PRIMARY KEY,
+  "admin_id" INT UNIQUE,
+  "merchant_name" VARCHAR(255),
+  "country_code" INT,
+  "created_at" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE "inventory" (
+  "id" SERIAL PRIMARY KEY,
+  "quantity" INT NOT NULL,
+  "status" VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE "prodprop" (
+  "id" SERIAL PRIMARY KEY,
+  "propname" VARCHAR(255),
+  "propvalue" VARCHAR(255),
+  "parent_id" INT
+);
+
+CREATE TABLE "products" (
+  "id" SERIAL PRIMARY KEY,
+  "name" VARCHAR(255),
+  "merchant_id" INT NOT NULL,
+  "price" INT NOT NULL,
+  "inventory_id" INT NOT NULL UNIQUE,
+  "created_at" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+  "prodprop_id" INT
+);
+
+CREATE TABLE "orders" (
+  "id" SERIAL PRIMARY KEY,
+  "user_id" INT NOT NULL,
+  "status" VARCHAR(50),
+  "created_at" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE "order_items" (
+  "order_id" INT,
+  "product_id" INT,
+  "price" INT,
+  "quantity" INT,
+  PRIMARY KEY ("order_id", "product_id")
+);
+
+-- =============================================
+-- FOREIGN KEY CONSTRAINTS
+-- =============================================
+
+-- Establishes the link between an administrative user and a merchant account.
+ALTER TABLE "merchants" ADD FOREIGN KEY ("admin_id") REFERENCES "users" ("id");
+
+-- Establishes the hierarchical relationship for product properties (e.g., category -> sub-category).
+ALTER TABLE "prodprop" ADD FOREIGN KEY ("parent_id") REFERENCES "prodprop" ("id");
+
+-- Links products to the merchant who sells them, their inventory record, and their properties.
+ALTER TABLE "products" ADD FOREIGN KEY ("merchant_id") REFERENCES "merchants" ("id");
+ALTER TABLE "products" ADD FOREIGN KEY ("inventory_id") REFERENCES "inventory" ("id");
+-- NOTE: The DBML used a many-to-many ref (<>) for prodprop_id, which is non-standard for a single column FK.
+-- This SQL implements it as a one-to-many relationship, which matches the table's column structure.
+ALTER TABLE "products" ADD FOREIGN KEY ("prodprop_id") REFERENCES "prodprop" ("id");
+
+-- Links an order to the user who placed it.
+-- NOTE: This relationship was implied by the 'user_id' column but was not explicitly in the DBML Refs.
+ALTER TABLE "orders" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+
+-- Links items in an order to the specific order and the specific product.
+ALTER TABLE "order_items" ADD FOREIGN KEY ("order_id") REFERENCES "orders" ("id");
+ALTER TABLE "order_items" ADD FOREIGN KEY ("product_id") REFERENCES "products" ("id");
