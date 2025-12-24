@@ -6,7 +6,7 @@
 -- =============================================
 
 CREATE TABLE "users" (
-  "id" SERIAL PRIMARY KEY,
+  "id" INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   "full_name" VARCHAR(255),
   "email" VARCHAR(255) UNIQUE NOT NULL,
   "created_at" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
@@ -14,7 +14,7 @@ CREATE TABLE "users" (
 );
 
 CREATE TABLE "merchants" (
-  "id" SERIAL PRIMARY KEY,
+  "id" INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   "admin_id" INT UNIQUE,
   "merchant_name" VARCHAR(255),
   "country_code" INT,
@@ -22,20 +22,20 @@ CREATE TABLE "merchants" (
 );
 
 CREATE TABLE "inventory" (
-  "id" SERIAL PRIMARY KEY,
+  "id" INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   "quantity" INT NOT NULL,
   "status" VARCHAR(50) NOT NULL
 );
 
 CREATE TABLE "prodprop" (
-  "id" SERIAL PRIMARY KEY,
+  "id" INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   "propname" VARCHAR(255),
   "propvalue" VARCHAR(255),
   "parent_id" INT
 );
 
 CREATE TABLE "products" (
-  "id" SERIAL PRIMARY KEY,
+  "id" INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   "name" VARCHAR(255),
   "merchant_id" INT NOT NULL,
   "price" INT NOT NULL,
@@ -45,7 +45,7 @@ CREATE TABLE "products" (
 );
 
 CREATE TABLE "orders" (
-  "id" SERIAL PRIMARY KEY,
+  "id" INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   "user_id" INT NOT NULL,
   "status" VARCHAR(50),
   "created_at" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
